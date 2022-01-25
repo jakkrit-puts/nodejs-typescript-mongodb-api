@@ -7,5 +7,3 @@ export const createUser = async (data: any) => {
     throw new Error(error);
   }
 };
-
-exports.findUser = () => {};

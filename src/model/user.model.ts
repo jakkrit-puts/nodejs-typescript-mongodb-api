@@ -22,9 +22,23 @@ const UserSchema = new mongoose.Schema(
   }
 );
 
+UserSchema.pre("save", async function (this: UserDocument, next: any) {
+  let user = this as UserDocument;
+
+  if (!user.isModified("password")) return next();
+
+  const salt = await bcrypt.genSalt(config.get("salt"));
+
+  const hash = await bcrypt.hashSync(user.password, salt);
+
+  user.password = hash;
+
+  return next();
+});
+
 UserSchema.methods.comparePassword = async function (userPassword: string) {
-    const user = this as UserDocument;
-    return bcrypt.compare(userPassword, user.password).catch((e) => false)
+  const user = this as UserDocument;
+  return bcrypt.compare(userPassword, user.password).catch((e) => false);
 };
 
 const User = mongoose.model<UserDocument>("User", UserSchema);
